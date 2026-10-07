@@ -5,6 +5,8 @@
 // @description  Speed optimized, no popups, visual button feedback.
 // @match        *://*.lightning.force.com/*
 // @grant        none
+// @updateURL    https://github.com/TechplexEngineer/userscript-amazon-cart-export/raw/refs/heads/main/cart2json-amazon.user.js
+// @downloadURL  https://github.com/TechplexEngineer/userscript-amazon-cart-export/raw/refs/heads/main/cart2json-amazon.user.js
 // ==/UserScript==
 
 (function() {
@@ -115,7 +117,7 @@
 
                 await fillInlineEditCell("rstk__syreqind_item__c", "Shop Supplies (General tools and supplies for the shop Ex: Screwdriver, sockets)", true);
                 await fillInlineEditCell("Vendor_Item_Number__c", item.link, false);
-                await fillInlineEditCell("Vendor_Item_Description__c", item.product_name, false);
+                await fillInlineEditCell("Vendor_Item_Description__c", item.product_name.slice(0,120), false);
                 await fillInlineEditCell("rstk__syreqind_qtyreq__c", cleanQty, false);
                 await fillInlineEditCell("rstk__syreqind_unitprice__c", cleanCost, false);
 
