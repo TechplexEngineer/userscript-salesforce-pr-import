@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Bulk Add Indirect Requisition Lines from Clipboard
 // @namespace    http://tampermonkey.net/
-// @version      1.12
-// @description  Speed optimized, no popups, visual button feedback.
+// @version      1.14
+// @description  Import items to buy from JSON on your clipboard. New in version 1.14 better handling for Salesforce updates.
 // @match        *://*.lightning.force.com/*
 // @grant        none
 // @updateURL    https://github.com/TechplexEngineer/userscript-amazon-cart-export/raw/refs/heads/main/cart2json-amazon.user.js
@@ -55,45 +55,49 @@
     }
 
     async function fillInlineEditCell(columnKey, value, isLookup = false) {
-        const cells = queryDeepAll(`td[data-col-key-value*="${columnKey}"]`);
-        if (!cells || cells.length === 0) return;
+    const cells = queryDeepAll(`td[data-col-key-value*="${columnKey}"]`);
+    if (!cells || cells.length === 0) return;
 
-        const targetCell = cells[0];
-        let inputEl = queryDeep('input', targetCell) || queryDeep('textarea', targetCell);
+    const targetCell = cells[0];
+    let inputEl = queryDeep('input', targetCell);
 
-        if (!inputEl) {
-            const editBtn = queryDeep('button[title="Edit"]', targetCell);
-            if (editBtn) {
-                editBtn.click();
-                await sleep(100);
-                inputEl = queryDeep('input', targetCell) || queryDeep('textarea', targetCell);
-            }
-        }
-
-        if (inputEl) {
-            inputEl.focus();
-            setNativeValue(inputEl, value);
-
-            if (isLookup) {
-                await sleep(500);
-                const listItem = queryDeep(`span[title="${value}"]`);
-                if (listItem) {
-                    listItem.click();
-                } else {
-                    inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40, which: 40, bubbles: true, composed: true }));
-                    await sleep(100);
-                    inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, composed: true }));
-                }
-            } else {
-                await sleep(50);
-                inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, composed: true }));
-                inputEl.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, composed: true }));
-            }
-
-            inputEl.dispatchEvent(new Event('blur', { bubbles: true, composed: true }));
-            await sleep(100);
+    if (!inputEl) {
+        const editBtn = queryDeep('button[title="Edit"]', targetCell);
+        if (editBtn) {
+            editBtn.click();
+            await sleep(300);
+            inputEl = queryDeep('input', targetCell);
         }
     }
+
+    if (inputEl) {
+        inputEl.focus();
+        setNativeValue(inputEl, value);
+
+        if (isLookup) {
+            // Give the grid time to query and render the dropdown list
+            await sleep(800);
+
+            // Look for matching items in the dynamically rendered dropdown list
+            let listItem = queryDeep(`span[title="${value}"]`) || queryDeep(`div[role="option"]`);
+            if (listItem) {
+                listItem.click();
+            } else {
+                // Fallback to keyboard navigation if specific match span isn't found
+                inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40, which: 40, bubbles: true, composed: true }));
+                await sleep(200);
+                inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, composed: true }));
+            }
+        } else {
+            await sleep(100);
+            inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, composed: true }));
+            inputEl.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, composed: true }));
+        }
+
+        inputEl.dispatchEvent(new Event('blur', { bubbles: true, composed: true }));
+        await sleep(200);
+    }
+}
 
     async function processJSON(lineItems) {
         console.log("Starting bulk insert...", lineItems);
