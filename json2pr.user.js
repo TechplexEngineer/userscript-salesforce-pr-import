@@ -5,8 +5,8 @@
 // @description  Import items to buy from JSON on your clipboard. New in version 1.14 better handling for Salesforce updates.
 // @match        *://*.lightning.force.com/*
 // @grant        none
-// @updateURL    https://github.com/TechplexEngineer/userscript-amazon-cart-export/raw/refs/heads/main/cart2json-amazon.user.js
-// @downloadURL  https://github.com/TechplexEngineer/userscript-amazon-cart-export/raw/refs/heads/main/cart2json-amazon.user.js
+// @updateURL    https://github.com/TechplexEngineer/userscript-salesforce-pr-import/raw/refs/heads/main/json2pr.user.js
+// @downloadURL  https://github.com/TechplexEngineer/userscript-salesforce-pr-import/raw/refs/heads/main/json2pr.user.js
 // ==/UserScript==
 
 (function() {
